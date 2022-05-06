@@ -1,2 +1,2 @@
-# personal projects
 # Nikodem Seidel
+personal projects

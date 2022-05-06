@@ -1,0 +1,131 @@
+Nikodem Seidel 
+
+Simple solution description:
+The simple solution prioritizes the streets with the largest amount of cars driving through them. We get the schedule for each street on each intersection
+by normalizing the activity on each street: we divide it by the minimal activity on any street on that intersection.
+
+Remark: More detailed description of this type of solution is in the comments in the python file containing the program.
+
+Complex solution description:
+Our solution is based on genetic algorithm.
+We create a starting population which consists of starting schedules where every street that is used by any car
+is set to 1 second. This approach does not influence the ending solution in any way,so that we do not risk any bias.
+Population can evolve in any direction.
+Then, we start our genetic algorithm. First we choose the smallest index from the randomly chosen k indices two times,
+so that we get parents (elements from the population with indices chosen before) for the child solution. We generate
+a child solution by performing a crossing-over of the parents' solutions. Based on the randomly drawn number, we either
+get the schedule for one of the intersection from one parent or another. Then, to change the solution even more,
+we mutate it. Mutation, based on a randomly drawn number, can be (does not have to, though) done in two ways:
+1) Two randomly selected streets from intersections' schedule are swapped, so that the latter one is executed earlier,
+2) Based on the randomly selected number (again) we either: double one of the streets in a schedule or remove one of them.
+We repeat the process as many times, as required to attain an entirely new population that contains only childrens' solutions.
+We sort the new solutions and choose only the best one and, if this one is the best of all obtained before, we update
+a value of the "best_schedule" and "best_score".
+This approach allows us to get almost an infinite number of possible solutions and that increases the chance of getting
+the best of the best schedule.
+
+How does the solution work?
+We create a class Cars to be able to create objects with attributes and methods:
+    - length: how many streets is on the car's path (-1, because the car starts at the end of the first street),
+    - route: tuple with the car's path (names of the streets),
+    - which_street = 0: index of a street in a car's route that it is currently on,
+    - to_end_of_street = 1: how much time the car has left till the end of the street,
+    - get_street(): the function that returns a name of the street the car is currently on,
+    - get_no_intersection(): function that returns the name of the intersection the street, that the car is currently on, ends with;
+
+We create class Intersection to be able to create objects with attributes:
+    - time = 0: how much time does the schedule for this intersection last,
+    - schedule = []: schedule for each intersection that contains the list with the names of the streets, that are
+    included in a schedule; each appearance equals 1 second scheduled for this street,
+    - schedule_seconds = []: how much time is scheduled for each street [name of the street, scheduled time];
+
+Function "starting_solution" creates the first, pretty basic, schedule:
+   	1) We open a file for reading, read the first line in the input file and set the values to variables: duration,  no_intersections,
+no_streets, no_cars and score.
+	2) We create:
+		- streets: dictionary, key: name of the street; value: (time, starting intersection, ending intersection)
+		- intersections: dictionary, key: name of the intersection; value: list of streets names
+		- streets_activity: dictionary, key: name of the street; value: number of times the street is used
+		- final: dictionary, key: name of the intersection; value: a list of tuples (name of the street, 
+		scheduled green light for that street)
+		- cars2: a list that contains objects from a class "Cars"
+	3) We iterate through all the streets written in the input file and copy names of the streets into a dictionary named "streets"
+	4) For every street in a dictionary "streets", we create a key in a dictionary "streets_activity" and set 0 as a value that 
+	we will update later
+	5) We create a list cars: a list of paths that each car is taking:
+		- We iterate through all the lines in the input file that contain the information about cars and we append 
+		each car's path to a list named "cars"
+		- We create an object from a class "Cars" and add it to a list "cars2"
+	6) We iterate through each path in a list "cars" and add 1 to a total activity (a value in a dictionary "streets")
+	    of a street (which is a key in a dictionary "streets") to count the number of times the street appears in all cars' paths
+	7) We iterate through each street in the dictionary "streets_activity" but we imediately discard those streets that are never used by any cars, because
+	we do not need to be included in a schedule
+	8) We take an ending intersection from a dictionary "streets" and we check whether it is already in a dictionary "intersections"
+		- if it is, we append a name of a street into a list that is a value of a certain key and contains name of every street that ends at this interseection
+		- if no, we create a new key in a dictionary "intersections" and assign it a list with a certain street as a value
+ 	9) We iterate through all the names of the intersections in the dictionary "intersections", we create a key in the dictionary "final" that is, for now, 
+	an object without attributes that are set manually:
+		- we iterate through all the streets that are ending at a certain intersection, we append a street to a schedule of the object 
+		from a class "Intersection", we increase a time by 1 and we schedule 1 second for every street
+	10) If the function is correctly executed, the value of "data" can be set to "True" and we return final, streets, cars2, score and duration
+
+Simulation is a function that performs the simulation. It consists of two parts:
+	1) The first one is responsible for moving the cars to the next street that is planned for them or putting them into their intersections
+	2) The second one executes schedule;
+To decrease the time of the execution, this function discards the unused streets and intersections.
+
+Mutation is changing the solutions in two ways:
+	1) Two randomly selected streets are swapped
+	2) One of the streets is doubled or deleted
+
+Crossover is a function that performs a crossing-over of the schedules of the parents to get new, child schedule: a schedule of a child is, for now, an empty dictionary 
+(key: name of the intersection, value: randomly selected (from one parent or another) schedule for that intersection
+
+Tournament is a function that selects "size" number of elements that are the random numbers from 0 to the population size-1 then, it returns the minimum element from that indices.
+
+getParentIndices returns two indices that are the output from the getTournamentSelection function.
+
+get_child returns the final_score and schedule of the new child and its schedule with the use of "getParentsIndices", "mutation", "crossover" and "simulation" function
+
+getOffspring is a function that returns childs' final scores and their schedules, we iterate "population_size" number of times to get "population_size" number of children that are created
+with the use of the function "get_child" and added to a list "off_spring".
+
+main function is a function that executes all of the previously mentioned functions in order to perform a simulation.
+
+
+Remark:
+The solutions can be better with your computer in the fridge.
+
+Summing-up, more sophisticated solution gives better results, because it iterates through most of the possible schedules, while simple solution finds one that seems best and returns it right away. The biggest difference we can find in instance named 'd.txt'.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
